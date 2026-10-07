@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Meet Transcript Export — настройки</title>
+<style>
+  body { font: 14px/1.5 Roboto, Arial, sans-serif; max-width: 560px; margin: 24px auto; color: #202124; }
+  h1 { font-size: 18px; }
+  label { display: block; margin-top: 14px; font-weight: 500; }
+  input[type="text"], input[type="number"], select { width: 100%; box-sizing: border-box; padding: 6px 8px; margin-top: 4px; font: inherit; }
+  h2 { font-size: 15px; margin-top: 26px; border-top: 1px solid #e0e0e0; padding-top: 14px; }
+  .hint { color: #5f6368; font-size: 12px; margin-top: 4px; }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  button { padding: 8px 14px; font: inherit; cursor: pointer; }
+  #status { margin-top: 12px; color: #188038; font-size: 13px; min-height: 16px; }
+  details { margin-top: 20px; background: #f1f3f4; padding: 10px 12px; border-radius: 6px; }
+</style>
+</head>
+<body>
+  <h1>Meet Transcript Export — настройки</h1>
+  <p class="hint">
+    Google Meet не даёт официального API для субтитров, поэтому расширение читает разметку
+    страницы. Если бейдж в углу вкладки Meet показывает «субтитры не найдены» при включённых
+    субтитрах — откройте DevTools на строке субтитров (правой кнопкой → Inspect) и подставьте
+    правильные CSS-селекторы ниже.
+  </p>
+
+  <label for="containerSelector">Селектор контейнера субтитров</label>
+  <input type="text" id="containerSelector" />
+  <div class="hint">CSS-селектор элемента, который содержит все строки субтитров целиком.</div>
+
+  <label for="entrySelector">Селектор одной строки субтитров</label>
+  <input type="text" id="entrySelector" />
+  <div class="hint">
+    Относительный селектор (может использовать <code>:scope</code>) — применяется к
+    контейнеру выше и должен находить каждую отдельную строку/реплику.
+  </div>
+
+  <label for="commitDelayMs">Задержка фиксации строки (мс)</label>
+  <input type="number" id="commitDelayMs" min="200" step="100" />
+  <div class="hint">
+    Сколько ждать без изменений текста, прежде чем считать строку финальной и сохранить её
+    (Google Meet правит текст в реальном времени, пока идёт распознавание).
+  </div>
+
+  <div class="row">
+    <input type="checkbox" id="debug" />
+    <label for="debug" style="margin:0;">Отладочные логи в консоль страницы Meet</label>
+  </div>
+
+  <h2>Автоэкспорт при закрытии вкладки / окончании звонка</h2>
+
+  <div class="row">
+    <input type="checkbox" id="autoExportEnabled" />
+    <label for="autoExportEnabled" style="margin:0;">Автоматически сохранять файл в загрузки</label>
+  </div>
+  <div class="hint">
+    Файл сохраняется в <code>Downloads/MeetTranscripts/</code> при закрытии вкладки со звонком
+    или при уходе со страницы звонка. Каждая сессия выгружается один раз.
+  </div>
+
+  <label for="autoExportFormat">Формат автоэкспорта</label>
+  <select id="autoExportFormat">
+    <option value="txt">TXT</option>
+    <option value="json">JSON</option>
+    <option value="both">TXT и JSON</option>
+  </select>
+
+  <div class="row">
+    <button id="save">Сохранить</button>
+    <button id="reset">Сбросить к значениям по умолчанию</button>
+  </div>
+  <div id="status"></div>
+
+  <details>
+    <summary>Как найти правильные селекторы</summary>
+    <ol>
+      <li>Включите субтитры в звонке Google Meet (кнопка CC).</li>
+      <li>Откройте DevTools (F12) → вкладка Elements.</li>
+      <li>Кликните инспектором на текст субтитров — найдите элемент, который целиком
+        оборачивает всю панель субтитров (обычно с атрибутом <code>aria-label</code> вроде
+        «Captions» или «Субтитры») — это селектор контейнера.</li>
+      <li>Внутри найдите повторяющийся элемент для одной реплики — обычно это
+        прямой потомок контейнера, который меняется при каждой новой фразе.</li>
+      <li>Включите отладочные логи выше и смотрите консоль вкладки Meet — расширение
+        печатает, что оно нашло.</li>
+    </ol>
+  </details>
+
+  <script src="storage.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
